@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       Option:
-        description: 'Do you want to include KernelSU?'
+        description: 'Do you want to include KernelSU-Next?'
         required: true
         type: choice
         options:
@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        device: [x1q, y2q, z3q, c1q, c2q, r8q, f2q, bloomxq, gts7l, gts7lwifi, gts7xl, gts7xlwifi]
+        device: [x1q, y2q, z3q, c1q, c2q, r8q]
     runs-on: ubuntu-24.04
 
     steps:
@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4    
         with:
           repository: GoRhanHee/kernel_samsung_sm8250_common
-          token: ${{ secrets.MY_PRIVATE_REPO_TOKEN }} 
+          token: ${{ secrets.REPO_TOKEN }} 
 
       - name: "Setting permission"
         run: chmod +x build.sh
