@@ -1,0 +1,56 @@
+name: Samsung SM8250 Kernel Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      Option:
+        description: 'Do you want to include KernelSU?'
+        required: true
+        type: choice
+        options:
+          - y
+          - n  
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        device: [x1q, y2q, z3q, c1q, c2q, r8q, f2q, bloomxq, gts7l, gts7lwifi, gts7xl, gts7xlwifi]
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: "Set up build environment"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential make automake autoconf libtool pkg-config \
+            bc bison flex libssl-dev libelf-dev libncurses5-dev libncurses-dev cpio \
+            clang lld gcc g++ \
+            git curl rsync wget pv \
+            python3 python3-pip python-is-python3 \
+            openjdk-17-jdk \
+            zip unzip p7zip-full tar \
+            lz4 xz-utils zlib1g-dev uuid-dev \
+            erofs-utils android-sdk-libsparse-utils \
+            fuse3 libfuse3-dev f2fs-tools fuse2fs attr e2fsprogs \
+            kmod
+          wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb && sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb             
+
+      - name: "Import kernel source"
+        uses: actions/checkout@v4    
+        with:
+          repository: GoRhanHee/kernel_samsung_sm8250_common
+          token: ${{ secrets.MY_PRIVATE_REPO_TOKEN }} 
+
+      - name: "Setting permission"
+        run: chmod +x build.sh
+
+      - name: "Build for specific device"
+        run: ./build.sh ${{ matrix.device }} ${{ github.event.inputs.Option }}
+
+      - name: Upload to GoFile
+        run: |
+          ZIP_FILE=$(find out -maxdepth 1 -type f -name "*.zip" | head -n 1)
+          RESPONSE=$(curl -s -F "file=@$ZIP_FILE" -F "token=${{ secrets.GOFILE_TOKEN }}" -F "folderId=${{ secrets.GOFILE_FOLDER_ID }}" "https://upload-eu-par.gofile.io/uploadFile")
+          echo "Uploaded successfully! Download link:"
+          echo "$RESPONSE" | jq -r '.data.downloadPage'   
