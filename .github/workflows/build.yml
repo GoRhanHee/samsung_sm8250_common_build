@@ -4,12 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       Option:
-        description: 'Do you want to include KernelSU-Next?'
+        description: 'What do you want build option?'
         required: true
         type: choice
         options:
-          - y
-          - n  
+          - ksun
+          - twrp
+          - stock  
 
 jobs:
   build:
@@ -48,9 +49,18 @@ jobs:
       - name: "Build for specific device"
         run: ./build.sh ${{ matrix.device }} ${{ github.event.inputs.Option }}
 
-      - name: Upload to GoFile
+      - name: Upload to GoFile with KernelSU/Stock
+        if: github.event.inputs.Option == 'ksun' || github.event.inputs.Option == 'stock'
         run: |
-          TARGET_FILE="prebuilts/output/${{ matrix.device }}_KSUN_Odin.tar"
+          TARGET_FILE="prebuilts/output/${{ matrix.device }}_Kernel_Odin.tar"
           RESPONSE=$(curl -s -F "file=@$TARGET_FILE" -F "token=${{ secrets.GOFILE_TOKEN }}" -F "folderId=${{ secrets.GOFILE_FOLDER_ID }}" "https://upload-eu-par.gofile.io/uploadFile")
           echo "Uploaded successfully! Download link:"
-          echo "$RESPONSE" | jq -r '.data.downloadPage'   
+          echo "$RESPONSE" | jq -r '.data.downloadPage'
+
+      - name: Upload to GoFile with TWRP
+        if: github.event.inputs.Option == 'twrp'
+        run: |
+          TARGET_FILE="prebuilts/output/${{ matrix.device }}_TWRP_Kernel.zip"
+          RESPONSE=$(curl -s -F "file=@$TARGET_FILE" -F "token=${{ secrets.GOFILE_TOKEN }}" -F "folderId=${{ secrets.GOFILE_FOLDER_ID }}" "https://upload-eu-par.gofile.io/uploadFile")
+          echo "Uploaded successfully! Download link:"
+          echo "$RESPONSE" | jq -r '.data.downloadPage'             
