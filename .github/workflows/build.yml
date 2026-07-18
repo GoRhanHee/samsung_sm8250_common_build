@@ -17,25 +17,18 @@ jobs:
     strategy:
       matrix:
         device: [x1q, y2q, z3q, c1q, c2q, r8q]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
 
     steps:
-      - name: "Set up build environment"
+      - name: Install required package
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            build-essential make automake autoconf libtool pkg-config \
-            bc bison flex libssl-dev libelf-dev libncurses5-dev libncurses-dev cpio \
-            clang lld gcc g++ \
-            git curl rsync wget pv \
-            python3 python3-pip python-is-python3 \
-            openjdk-17-jdk \
-            zip unzip p7zip-full tar \
-            lz4 xz-utils zlib1g-dev uuid-dev \
-            erofs-utils android-sdk-libsparse-utils \
-            fuse3 libfuse3-dev f2fs-tools fuse2fs attr e2fsprogs \
-            kmod
-          wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb && sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb             
+            build-essential git libssl-dev bc flex bison \
+            libncurses5-dev libncurses-dev libtinfo5 cpio zip unzip \
+            python3 curl rsync kmod libelf-dev \
+            lz4 tar openssl python3-pip \
+            gcc clang        
 
       - name: "Import kernel source"
         uses: actions/checkout@v4    
